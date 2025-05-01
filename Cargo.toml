@@ -33,7 +33,7 @@ version = "2.0.12"
 default-features = false
 
 [features]
-default = ["std", "serde", "static", "unsafe-assert"]
+default = ["std"]
 diagnostics = ["dep:miette", "std"]
 serde = ["dep:serde"]
 static = ["into-static"]
