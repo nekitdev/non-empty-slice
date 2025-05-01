@@ -84,6 +84,7 @@ impl<'a, T> Slice<'a, T> {
 
     #[cfg(feature = "unsafe-assert")]
     const fn assert_non_empty(&self) {
+        // SAFETY: the value is non-empty by construction
         unsafe {
             assert_unchecked(!self.value.is_empty());
         }

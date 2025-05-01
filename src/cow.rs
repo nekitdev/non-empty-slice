@@ -177,6 +177,7 @@ impl<'a, T: Clone> CowSlice<'a, T> {
     pub fn owned(value: Vec<T>) -> Result<Self, Empty> {
         const_early!(value.is_empty() => Empty);
 
+        // SAFETY: the value is non-empty at this point
         Ok(unsafe { Self::owned_unchecked(value) })
     }
 

@@ -13,6 +13,9 @@ use alloc::{borrow::ToOwned, vec::Vec};
 
 use const_macros::{const_early, const_ok};
 
+#[cfg(feature = "static")]
+use into_static::IntoStatic;
+
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Error};
 
@@ -83,6 +86,7 @@ impl<T> OwnedSlice<T> {
     pub fn new(value: Vec<T>) -> Result<Self, Empty> {
         const_early!(value.is_empty() => Empty);
 
+        // SAFETY: the value is non-empty at this point
         Ok(unsafe { Self::new_unchecked(value) })
     }
 
@@ -104,6 +108,7 @@ impl<T> OwnedSlice<T> {
 
     #[cfg(feature = "unsafe-assert")]
     fn assert_non_empty(&self) {
+        // SAFETY: the value is non-empty by construction
         unsafe {
             assert_unchecked(!self.value.is_empty());
         }
@@ -129,11 +134,23 @@ impl<T> OwnedSlice<T> {
 impl<T: Clone> OwnedSlice<T> {
     /// Constructs [`Self`] from [`Slice<'_, T>`](Slice) via cloning.
     pub fn from_slice(value: Slice<'_, T>) -> Self {
+        // SAFETY: the value is non-empty by construction
         unsafe { Self::new_unchecked(value.take().to_owned()) }
     }
 
     /// Constructs [`Self`] from [`CowSlice<'_, T>`](CowSlice) via (optionally) cloning.
     pub fn from_cow_slice(value: CowSlice<'_, T>) -> Self {
+        // SAFETY: the value is non-empty by construction
         unsafe { Self::new_unchecked(value.take().into_owned()) }
+    }
+}
+
+#[cfg(feature = "static")]
+impl<T: Clone + IntoStatic<Static: Clone>> IntoStatic for OwnedSlice<T> {
+    type Static = OwnedSlice<T::Static>;
+
+    fn into_static(self) -> Self::Static {
+        // SAFETY: the value is non-empty by construction
+        unsafe { Self::Static::new_unchecked(self.take().into_static()) }
     }
 }
