@@ -54,6 +54,11 @@ impl<T> Deref for Slice<'_, T> {
 }
 
 impl<'a, T> Slice<'a, T> {
+    /// Constructs [`Self`], provided the given slice is non-empty.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Empty`] if the given slice is empty.
     pub const fn new(value: &'a [T]) -> Result<Self, Empty> {
         const_early!(value.is_empty() => Empty);
 
@@ -61,10 +66,18 @@ impl<'a, T> Slice<'a, T> {
         Ok(unsafe { Self::new_unchecked(value) })
     }
 
+    /// Similar to [`new`], but the error is discarded.
+    ///
+    /// [`new`]: Self::new
     pub const fn new_ok(value: &'a [T]) -> Option<Self> {
         const_ok!(Self::new(value))
     }
 
+    /// Constructs [`Self`] from the given slice, provided it is non-empty.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that the given slice is non-empty.
     pub const unsafe fn new_unchecked(value: &'a [T]) -> Self {
         Self { value }
     }
@@ -76,6 +89,7 @@ impl<'a, T> Slice<'a, T> {
         }
     }
 
+    /// Consumes [`Self`], returning the wrapped slice.
     pub const fn take(self) -> &'a [T] {
         #[cfg(feature = "unsafe-assert")]
         self.assert_non_empty();
@@ -84,10 +98,12 @@ impl<'a, T> Slice<'a, T> {
     }
 }
 
+/// An alias for [`Slice<'static, T>`](Slice).
 #[cfg(feature = "static")]
 pub type StaticSlice<T> = Slice<'static, T>;
 
 impl<T> Slice<'_, T> {
+    /// Returns the wrapped slice.
     pub const fn get(&self) -> &[T] {
         #[cfg(feature = "unsafe-assert")]
         self.assert_non_empty();

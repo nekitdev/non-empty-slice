@@ -18,6 +18,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Error};
 
 use crate::{cow::CowSlice, empty::Empty, slice::Slice};
 
+/// Represents non-empty owned slices.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct OwnedSlice<T> {
     value: Vec<T>,
@@ -74,16 +75,29 @@ impl<T> Deref for OwnedSlice<T> {
 }
 
 impl<T> OwnedSlice<T> {
+    /// Constructs [`Self`], provided that the input is non-empty.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Empty`] if the input is empty.
     pub fn new(value: Vec<T>) -> Result<Self, Empty> {
         const_early!(value.is_empty() => Empty);
 
         Ok(unsafe { Self::new_unchecked(value) })
     }
 
+    /// Similar to [`new`], but the error is discarded.
+    ///
+    /// [`new`]: Self::new
     pub fn new_ok(value: Vec<T>) -> Option<Self> {
         const_ok!(Self::new(value))
     }
 
+    /// Constructs [`Self`] without checking that the input is non-empty.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that the value is non-empty.
     pub const unsafe fn new_unchecked(value: Vec<T>) -> Self {
         Self { value }
     }
@@ -95,6 +109,7 @@ impl<T> OwnedSlice<T> {
         }
     }
 
+    /// Consumes [`Self`] and returns the contained [`Vec<T>`].
     pub fn take(self) -> Vec<T> {
         #[cfg(feature = "unsafe-assert")]
         self.assert_non_empty();
@@ -102,6 +117,7 @@ impl<T> OwnedSlice<T> {
         self.value
     }
 
+    /// Returns the contained slice.
     pub fn get(&self) -> &[T] {
         #[cfg(feature = "unsafe-assert")]
         self.assert_non_empty();
@@ -111,10 +127,12 @@ impl<T> OwnedSlice<T> {
 }
 
 impl<T: Clone> OwnedSlice<T> {
+    /// Constructs [`Self`] from [`Slice<'_, T>`](Slice) via cloning.
     pub fn from_slice(value: Slice<'_, T>) -> Self {
         unsafe { Self::new_unchecked(value.take().to_owned()) }
     }
 
+    /// Constructs [`Self`] from [`CowSlice<'_, T>`](CowSlice) via (optionally) cloning.
     pub fn from_cow_slice(value: CowSlice<'_, T>) -> Self {
         unsafe { Self::new_unchecked(value.take().into_owned()) }
     }
