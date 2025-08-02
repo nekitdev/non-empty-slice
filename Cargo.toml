@@ -1,6 +1,6 @@
 [package]
 name = "non-empty-slice"
-version = "0.2.2"
+version = "0.3.0"
 authors = ["nekitdev <nekit@nekit.dev>"]
 edition = "2024"
 description = "Non-empty slices."
@@ -10,14 +10,6 @@ repository = "https://github.com/nekitdev/non-empty-slice"
 license = "MIT"
 keywords = ["non-empty", "slice"]
 categories = ["no-std", "no-std::no-alloc", "rust-patterns"]
-
-[dependencies.const-macros]
-version = "0.3.1"
-
-[dependencies.into-static]
-version = "0.5.0"
-default-features = false
-optional = true
 
 [dependencies.miette]
 version = "7.6.0"
@@ -36,11 +28,10 @@ default-features = false
 default = ["std"]
 diagnostics = ["dep:miette", "std"]
 serde = ["dep:serde"]
-static = ["into-static"]
 unsafe-assert = []
-alloc = ["serde?/alloc", "into-static?/alloc"]
-std = ["serde?/std", "into-static?/std"]
+alloc = ["serde?/alloc"]
+std = ["serde?/std"]
 
 [package.metadata.docs.rs]
-features = ["serde", "static"]
+features = ["serde"]
 rustdoc-args = ["--cfg", "docsrs"]

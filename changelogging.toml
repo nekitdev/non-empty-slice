@@ -1,6 +1,6 @@
 [context]
 name = "non-empty-slice"
-version = "0.2.2"
+version = "0.3.0"
 url = "https://github.com/nekitdev/non-empty-slice"
 
 [formats]

@@ -3,48 +3,86 @@
 #[cfg(not(any(feature = "std", feature = "alloc")))]
 compile_error!("expected either `std` or `alloc` to be enabled");
 
-#[cfg(feature = "unsafe-assert")]
-use core::hint::assert_unchecked;
-
-use core::ops::Deref;
-
 #[cfg(all(not(feature = "std"), feature = "alloc"))]
 use alloc::{borrow::ToOwned, vec::Vec};
 
-use const_macros::{const_early, const_ok};
+use core::{borrow::Borrow, fmt, ops::Deref};
 
-#[cfg(feature = "static")]
-use into_static::IntoStatic;
+use thiserror::Error;
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Error};
+use crate::slice::Slice;
 
-use crate::{cow::CowSlice, empty::Empty, slice::Slice};
+/// The error message used when the owned slice is empty.
+pub const EMPTY_OWNED: &str = "the owned slice is empty";
 
-/// Represents non-empty owned slices.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct OwnedSlice<T> {
-    value: Vec<T>,
+/// Similar to [`Empty`], but holds the empty slice provided.
+///
+/// [`Empty`]: crate::slice::Empty
+#[derive(Error)]
+#[error("{EMPTY_OWNED}")]
+#[cfg_attr(
+    feature = "diagnostics",
+    derive(miette::Diagnostic),
+    diagnostic(
+        code(non_empty_slice::owned),
+        help("make sure the owned slice is non-empty")
+    )
+)]
+pub struct EmptyOwned<T> {
+    slice: Vec<T>,
 }
 
-#[cfg(feature = "serde")]
-impl<T: Serialize> Serialize for OwnedSlice<T> {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        self.get().serialize(serializer)
+const NAME: &str = "EmptyOwned";
+const SLICE: &str = "slice";
+
+struct EmptySlice;
+
+impl fmt::Debug for EmptySlice {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.debug_list().finish()
     }
 }
 
-#[cfg(feature = "serde")]
-impl<'de, T: Deserialize<'de>> Deserialize<'de> for OwnedSlice<T> {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        let value = Vec::deserialize(deserializer)?;
+impl<T> fmt::Debug for EmptyOwned<T> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct(NAME)
+            .field(SLICE, &EmptySlice)
+            .finish()
+    }
+}
 
-        Self::new(value).map_err(Error::custom)
+impl<T> EmptyOwned<T> {
+    // NOTE: this is private to prevent creating this error with non-empty slices
+    const fn new(slice: Vec<T>) -> Self {
+        Self { slice }
+    }
+
+    /// Returns the contained empty slice.
+    #[must_use]
+    pub fn get(self) -> Vec<T> {
+        self.slice
+    }
+}
+
+/// Represents non-empty owned bytes, [`OwnedSlice<u8>`].
+pub type OwnedBytes = OwnedSlice<u8>;
+
+/// Represents non-empty [`Vec<T>`] values.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[repr(transparent)]
+pub struct OwnedSlice<T> {
+    inner: Vec<T>,
+}
+
+impl<T> Borrow<Slice<T>> for OwnedSlice<T> {
+    fn borrow(&self) -> &Slice<T> {
+        self.as_slice()
     }
 }
 
 impl<T> TryFrom<Vec<T>> for OwnedSlice<T> {
-    type Error = Empty;
+    type Error = EmptyOwned<T>;
 
     fn try_from(value: Vec<T>) -> Result<Self, Self::Error> {
         Self::new(value)
@@ -53,104 +91,145 @@ impl<T> TryFrom<Vec<T>> for OwnedSlice<T> {
 
 impl<T> From<OwnedSlice<T>> for Vec<T> {
     fn from(owned: OwnedSlice<T>) -> Self {
-        owned.take()
+        owned.get()
     }
 }
 
-impl<T: Clone> From<Slice<'_, T>> for OwnedSlice<T> {
-    fn from(slice: Slice<'_, T>) -> Self {
+impl<T: Clone> From<&Slice<T>> for OwnedSlice<T> {
+    fn from(slice: &Slice<T>) -> Self {
         Self::from_slice(slice)
     }
 }
 
-impl<T: Clone> From<CowSlice<'_, T>> for OwnedSlice<T> {
-    fn from(cow: CowSlice<'_, T>) -> Self {
-        Self::from_cow_slice(cow)
+impl<T> AsRef<Self> for OwnedSlice<T> {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
+impl<T> AsRef<Vec<T>> for OwnedSlice<T> {
+    fn as_ref(&self) -> &Vec<T> {
+        self.as_owned()
+    }
+}
+
+impl<T> AsRef<Slice<T>> for OwnedSlice<T> {
+    fn as_ref(&self) -> &Slice<T> {
+        self.as_slice()
+    }
+}
+
+impl<T> AsRef<[T]> for OwnedSlice<T> {
+    fn as_ref(&self) -> &[T] {
+        self.as_slice().get()
     }
 }
 
 impl<T> Deref for OwnedSlice<T> {
-    type Target = [T];
+    type Target = Vec<T>;
 
     fn deref(&self) -> &Self::Target {
-        self.get()
+        self.as_owned()
     }
 }
 
 impl<T> OwnedSlice<T> {
-    /// Constructs [`Self`], provided that the input is non-empty.
+    /// Constructs [`Self`], provided that the [`Vec<T>`] is non-empty.
     ///
     /// # Errors
     ///
-    /// Returns [`Empty`] if the input is empty.
-    pub fn new(value: Vec<T>) -> Result<Self, Empty> {
-        const_early!(value.is_empty() => Empty);
-
-        // SAFETY: the value is non-empty at this point
-        Ok(unsafe { Self::new_unchecked(value) })
-    }
-
-    /// Similar to [`new`], but the error is discarded.
+    /// Returns [`EmptyOwned<T>`] if the slice is empty.
     ///
-    /// [`new`]: Self::new
-    pub fn new_ok(value: Vec<T>) -> Option<Self> {
-        const_ok!(Self::new(value))
+    /// # Examples
+    ///
+    /// Basic snippet:
+    ///
+    /// ```
+    /// use non_empty_slice::OwnedSlice;
+    ///
+    /// let non_empty = OwnedSlice::new(vec![1, 2, 3]).unwrap();
+    /// ```
+    ///
+    /// Handling possible errors and recovering empty slices:
+    ///
+    /// ```
+    /// use non_empty_slice::OwnedBytes;
+    ///
+    /// let empty_owned = OwnedBytes::new(Vec::new()).unwrap_err();
+    ///
+    /// let empty = empty_owned.get();
+    /// ```
+    pub const fn new(slice: Vec<T>) -> Result<Self, EmptyOwned<T>> {
+        if slice.is_empty() {
+            return Err(EmptyOwned::new(slice));
+        }
+
+        // SAFETY: the slice is non-empty at this point
+        Ok(unsafe { Self::new_unchecked(slice) })
     }
 
-    /// Constructs [`Self`] without checking that the input is non-empty.
+    /// Constructs [`Self`] without checking that the slice is non-empty.
     ///
     /// # Safety
     ///
-    /// The caller must ensure that the value is non-empty.
-    pub const unsafe fn new_unchecked(value: Vec<T>) -> Self {
-        Self { value }
+    /// The caller must ensure that the slice is non-empty.
+    #[must_use]
+    pub const unsafe fn new_unchecked(inner: Vec<T>) -> Self {
+        Self { inner }
     }
 
     #[cfg(feature = "unsafe-assert")]
-    fn assert_non_empty(&self) {
-        // SAFETY: the value is non-empty by construction
+    const fn assert_non_empty(&self) {
+        use core::hint::assert_unchecked;
+
+        // SAFETY: the slice is non-empty by construction
         unsafe {
-            assert_unchecked(!self.value.is_empty());
+            assert_unchecked(!self.inner.is_empty());
         }
     }
 
-    /// Consumes [`Self`] and returns the contained [`Vec<T>`].
-    pub fn take(self) -> Vec<T> {
-        #[cfg(feature = "unsafe-assert")]
-        self.assert_non_empty();
-
-        self.value
+    /// Returns the contained slice reference as [`Slice<T>`].
+    #[must_use]
+    pub const fn as_slice(&self) -> &Slice<T> {
+        // SAFETY: the slice is non-empty by construction
+        unsafe { Slice::from_slice_unchecked(self.inner.as_slice()) }
     }
 
-    /// Returns the contained slice.
-    pub fn get(&self) -> &[T] {
+    /// Returns the contained slice reference.
+    #[must_use]
+    pub const fn as_owned(&self) -> &Vec<T> {
         #[cfg(feature = "unsafe-assert")]
         self.assert_non_empty();
 
-        self.value.as_slice()
+        &self.inner
+    }
+
+    /// Returns the contained [`Vec<T>`].
+    #[must_use]
+    pub fn get(self) -> Vec<T> {
+        #[cfg(feature = "unsafe-assert")]
+        self.assert_non_empty();
+
+        self.inner
     }
 }
 
 impl<T: Clone> OwnedSlice<T> {
-    /// Constructs [`Self`] from [`Slice<'_, T>`](Slice) via cloning.
-    pub fn from_slice(value: Slice<'_, T>) -> Self {
-        // SAFETY: the value is non-empty by construction
-        unsafe { Self::new_unchecked(value.take().to_owned()) }
-    }
-
-    /// Constructs [`Self`] from [`CowSlice<'_, T>`](CowSlice) via (optionally) cloning.
-    pub fn from_cow_slice(value: CowSlice<'_, T>) -> Self {
-        // SAFETY: the value is non-empty by construction
-        unsafe { Self::new_unchecked(value.take().into_owned()) }
-    }
-}
-
-#[cfg(feature = "static")]
-impl<T: Clone + IntoStatic<Static: Clone>> IntoStatic for OwnedSlice<T> {
-    type Static = OwnedSlice<T::Static>;
-
-    fn into_static(self) -> Self::Static {
-        // SAFETY: the value is non-empty by construction
-        unsafe { Self::Static::new_unchecked(self.take().into_static()) }
+    /// Constructs [`Self`] from [`Slice<T>`] via cloning.
+    ///
+    /// # Examples
+    ///
+    /// Basic snippet:
+    ///
+    /// ```
+    /// use non_empty_slice::{OwnedBytes, Bytes};
+    ///
+    /// let nekit = Bytes::from_slice(b"nekit").unwrap();
+    ///
+    /// let owned = OwnedBytes::from_slice(nekit);
+    /// ```
+    pub fn from_slice(slice: &Slice<T>) -> Self {
+        // SAFETY: the slice is non-empty by construction
+        unsafe { Self::new_unchecked(slice.get().to_owned()) }
     }
 }

@@ -1,22 +1,39 @@
-//! Macros used for constructing non-empty slices.
+//! Macros for creating non-empty slices in `const` contexts.
 
-/// Constructs [`Slice`] from the given slice, panicking if it is empty.
+/// Constantly constructs [`Slice`] from the given slice, failing compilation if the slice is empty.
 ///
 /// [`Slice`]: crate::slice::Slice
 #[macro_export]
 macro_rules! const_slice {
     ($slice: expr) => {
-        $crate::slice::Slice::new_ok($slice).expect($crate::empty::EMPTY)
+        const { $crate::slice::Slice::from_slice($slice).expect($crate::slice::EMPTY) }
     };
 }
 
-/// Similar to [`const_slice`], but constructs borrowed [`CowSlice`].
+/// Similar to [`const_slice!`], but constructs [`Bytes`].
 ///
-/// [`CowSlice`]: crate::cow::CowSlice
-#[cfg(any(feature = "alloc", feature = "std"))]
+/// # Examples
+///
+/// Simple usage:
+///
+/// ```
+/// use non_empty_slice::const_bytes;
+///
+/// let nekit = const_bytes!(b"nekit");
+/// ```
+///
+/// Compilation failure if the bytes are empty:
+///
+/// ```compile_fail
+/// use non_empty_slice::const_bytes;
+///
+/// let empty = const_bytes!(b"");
+/// ```
+///
+/// [`Bytes`]: crate::slice::Bytes
 #[macro_export]
-macro_rules! const_borrowed_slice {
-    ($slice: expr) => {
-        $crate::cow::CowSlice::borrowed_ok($slice).expect($crate::empty::EMPTY)
+macro_rules! const_bytes {
+    ($bytes: expr) => {
+        const { $crate::slice::Bytes::from_slice($bytes).expect($crate::slice::EMPTY) }
     };
 }
