@@ -2,6 +2,12 @@
 
 <!-- changelogging: start -->
 
+## [0.3.0](https://github.com/nekitdev/non-empty-slice/tree/v0.3.0) (2025-08-02)
+
+### Changes
+
+- The entire crate was rewritten; see [docs](https://docs.rs/non-empty-slice) for more information.
+
 ## [0.2.2](https://github.com/nekitdev/non-empty-slice/tree/v0.2.2) (2025-07-24)
 
 No significant changes.
