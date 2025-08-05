@@ -21,7 +21,7 @@ Or by directly specifying it in the configuration like so:
 
 ```toml
 [dependencies]
-non-empty-slice = "0.3.0"
+non-empty-slice = "0.3.1"
 ```
 
 Alternatively, you can add it directly from the source:

@@ -233,3 +233,19 @@ impl<T: Clone> OwnedSlice<T> {
         unsafe { Self::new_unchecked(slice.get().to_owned()) }
     }
 }
+
+#[cfg(feature = "ownership")]
+mod ownership {
+    use ownership::IntoOwned;
+
+    use super::OwnedSlice;
+
+    impl<T: IntoOwned> IntoOwned for OwnedSlice<T> {
+        type Owned = OwnedSlice<T::Owned>;
+
+        fn into_owned(self) -> Self::Owned {
+            // SAFETY: `into_owned` does not affect slice non-emptiness
+            unsafe { OwnedSlice::new_unchecked(self.get().into_owned()) }
+        }
+    }
+}
