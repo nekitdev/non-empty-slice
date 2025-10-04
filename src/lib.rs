@@ -1,6 +1,6 @@
 //! Non-empty slices.
 
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
