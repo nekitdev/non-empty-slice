@@ -302,7 +302,7 @@ impl<T> NonEmptyVec<T> {
     }
 
     // NOTE: using this private method should always be coupled with the INVARIANT explanation
-    pub(crate) const fn as_mut_vec_no_assert(&mut self) -> &mut Vec<T> {
+    const fn as_mut_vec_no_assert(&mut self) -> &mut Vec<T> {
         &mut self.inner
     }
 

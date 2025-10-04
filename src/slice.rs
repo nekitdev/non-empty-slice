@@ -400,8 +400,16 @@ impl<T> NonEmptySlice<T> {
 
         // SAFETY: the slice is non-empty by construction
         unsafe {
-            assert_unchecked(!self.inner.is_empty());
+            assert_unchecked(!self.as_slice_no_assert().is_empty());
         }
+    }
+
+    const fn as_slice_no_assert(&self) -> &[T] {
+        &self.inner
+    }
+
+    const fn as_mut_slice_no_assert(&mut self) -> &mut [T] {
+        &mut self.inner
     }
 
     /// Returns the contained slice.
@@ -422,7 +430,7 @@ impl<T> NonEmptySlice<T> {
         #[cfg(feature = "unsafe-assert")]
         self.assert_non_empty();
 
-        &self.inner
+        self.as_slice_no_assert()
     }
 
     /// Returns the contained mutable slice.
@@ -431,7 +439,7 @@ impl<T> NonEmptySlice<T> {
         #[cfg(feature = "unsafe-assert")]
         self.assert_non_empty();
 
-        &mut self.inner
+        self.as_mut_slice_no_assert()
     }
 
     /// Checks if the slice is empty. Always returns [`false`].
