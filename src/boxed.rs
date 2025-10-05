@@ -193,7 +193,7 @@ impl<T> NonEmptySlice<T> {
     #[must_use]
     pub unsafe fn from_boxed_slice_unchecked(boxed: Box<[T]>) -> Box<Self> {
         // SAFETY: the caller must ensure that the boxed slice is non-empty
-        // moreover, `Slice` is `repr(transparent)`, so it is safe to transmute
+        // moreover, `Self` is `repr(transparent)`, so it is safe to transmute
         // finally, `Box` is created from the raw pointer existing within this function only
         unsafe { Box::from_raw(Box::into_raw(boxed) as *mut Self) }
     }
@@ -201,7 +201,7 @@ impl<T> NonEmptySlice<T> {
     /// Converts [`Self`] into [`Box<[T]>`](Box).
     #[must_use]
     pub fn into_boxed_slice(self: Box<Self>) -> Box<[T]> {
-        // SAFETY: `Slice` is `repr(transparent)`, so it is safe to transmute
+        // SAFETY: `Self` is `repr(transparent)`, so it is safe to transmute
         // moreover, `Box` is created from the raw pointer existing within this function only
         unsafe { Box::from_raw(Box::into_raw(self) as *mut [T]) }
     }

@@ -375,7 +375,7 @@ impl<T> NonEmptySlice<T> {
         debug_assert!(!slice.is_empty());
 
         // SAFETY: the caller must ensure that the slice is non-empty
-        // `Slice` is `repr(transparent)`, so it is safe to transmute
+        // `Self` is `repr(transparent)`, so it is safe to transmute
         unsafe { &*(ptr::from_ref(slice) as *const Self) }
     }
 
@@ -390,7 +390,7 @@ impl<T> NonEmptySlice<T> {
         debug_assert!(!slice.is_empty());
 
         // SAFETY: the caller must ensure that the slice is non-empty
-        // `Slice` is `repr(transparent)`, so it is safe to transmute
+        // `Self` is `repr(transparent)`, so it is safe to transmute
         unsafe { &mut *(ptr::from_mut(slice) as *mut Self) }
     }
 
