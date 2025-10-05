@@ -34,27 +34,27 @@ impl Write for &mut NonEmptyBytes {
 
 impl Write for NonEmptyByteVec {
     fn write(&mut self, buffer: &Bytes) -> Result<usize> {
-        // INVARIANT: writing can not make the vector empty
-        self.as_mut_vec().write(buffer)
+        // SAFETY: writing can not make the vector empty
+        unsafe { self.as_mut_vec().write(buffer) }
     }
 
     fn write_vectored(&mut self, buffers: &ByteSlices<'_>) -> Result<usize> {
-        // INVARIANT: writing can not make the vector empty
-        self.as_mut_vec().write_vectored(buffers)
+        // SAFETY: writing can not make the vector empty
+        unsafe { self.as_mut_vec().write_vectored(buffers) }
     }
 
     fn write_all(&mut self, buffer: &Bytes) -> Result<()> {
-        // INVARIANT: writing can not make the vector empty
-        self.as_mut_vec().write_all(buffer)
+        // SAFETY: writing can not make the vector empty
+        unsafe { self.as_mut_vec().write_all(buffer) }
     }
 
     fn write_fmt(&mut self, arguments: fmt::Arguments<'_>) -> Result<()> {
-        // INVARIANT: writing can not make the vector empty
-        self.as_mut_vec().write_fmt(arguments)
+        // SAFETY: writing can not make the vector empty
+        unsafe { self.as_mut_vec().write_fmt(arguments) }
     }
 
     fn flush(&mut self) -> Result<()> {
-        // INVARIANT: flushing can not make the vector empty
-        self.as_mut_vec().flush()
+        // SAFETY: flushing can not make the vector empty
+        unsafe { self.as_mut_vec().flush() }
     }
 }

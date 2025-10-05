@@ -93,8 +93,10 @@ impl<T: Clone> Clone for NonEmptyVec<T> {
     }
 
     fn clone_from(&mut self, source: &Self) {
-        // INVARIANT: cloning from non-empty vector can not make the vector empty
-        self.as_mut_vec().clone_from(source.as_vec());
+        // SAFETY: cloning from non-empty vector can not make the vector empty
+        unsafe {
+            self.as_mut_vec().clone_from(source.as_vec());
+        }
     }
 }
 
@@ -237,8 +239,8 @@ impl<T, I: SliceIndex<[T]>> Index<I> for NonEmptyVec<T> {
 
 impl<T, I: SliceIndex<[T]>> IndexMut<I> for NonEmptyVec<T> {
     fn index_mut(&mut self, index: I) -> &mut Self::Output {
-        // INVARIANT: indexing can not make the vector empty
-        self.as_mut_vec().index_mut(index)
+        // SAFETY: indexing can not make the vector empty
+        unsafe { self.as_mut_vec().index_mut(index) }
     }
 }
 
@@ -301,7 +303,6 @@ impl<T> NonEmptyVec<T> {
         &self.inner
     }
 
-    // NOTE: using this private method should always be coupled with the INVARIANT explanation
     const fn as_mut_vec_no_assert(&mut self) -> &mut Vec<T> {
         &mut self.inner
     }
@@ -333,16 +334,8 @@ impl<T> NonEmptyVec<T> {
     /// Extracts the mutable slice containing the entire vector.
     #[must_use]
     pub const fn as_mut_slice(&mut self) -> &mut [T] {
-        // INVARIANT: getting mutable slice can not make the vector empty
-        self.as_mut_vec().as_mut_slice()
-    }
-
-    // NOTE: using this private method should always be coupled with the INVARIANT explanation
-    pub(crate) const fn as_mut_vec(&mut self) -> &mut Vec<T> {
-        #[cfg(feature = "unsafe-assert")]
-        self.assert_non_empty();
-
-        self.as_mut_vec_no_assert()
+        // SAFETY: getting mutable slice can not make the vector empty
+        unsafe { self.as_mut_vec().as_mut_slice() }
     }
 
     /// Returns the contained [`Vec<T>`] behind immutable reference.
@@ -352,6 +345,19 @@ impl<T> NonEmptyVec<T> {
         self.assert_non_empty();
 
         self.as_vec_no_assert()
+    }
+
+    /// Returns the contained [`Vec<T>`] behind mutable reference.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that the returned vector remains non-empty.
+    #[must_use]
+    pub const unsafe fn as_mut_vec(&mut self) -> &mut Vec<T> {
+        #[cfg(feature = "unsafe-assert")]
+        self.assert_non_empty();
+
+        self.as_mut_vec_no_assert()
     }
 
     /// Returns the contained [`Vec<T>`].
@@ -427,8 +433,10 @@ impl<T> NonEmptyVec<T> {
     ///
     /// Panics on capacity overflow.
     pub fn push(&mut self, value: T) {
-        // INVARIANT: pushing can not make the vector empty
-        self.as_mut_vec().push(value);
+        // SAFETY: pushing can not make the vector empty
+        unsafe {
+            self.as_mut_vec().push(value);
+        }
     }
 
     /// Reserves capacity for at least `additional` more values to be inserted into the vector.
@@ -443,8 +451,10 @@ impl<T> NonEmptyVec<T> {
     ///
     /// Panics on capacity overflow.
     pub fn reserve(&mut self, additional: Size) {
-        // INVARIANT: reserving can not make the vector empty
-        self.as_mut_vec().reserve(additional.get());
+        // SAFETY: reserving can not make the vector empty
+        unsafe {
+            self.as_mut_vec().reserve(additional.get());
+        }
     }
 
     /// Reserves the minimum capacity for exactly `additional` more values to be inserted
@@ -463,8 +473,10 @@ impl<T> NonEmptyVec<T> {
     ///
     /// [`reserve`]: Self::reserve
     pub fn reserve_exact(&mut self, additional: Size) {
-        // INVARIANT: reserving can not make the vector empty
-        self.as_mut_vec().reserve_exact(additional.get());
+        // SAFETY: reserving can not make the vector empty
+        unsafe {
+            self.as_mut_vec().reserve_exact(additional.get());
+        }
     }
 
     /// Tries to reserve capacity for at least `additional` more values to be inserted
@@ -480,8 +492,8 @@ impl<T> NonEmptyVec<T> {
     ///
     /// Returns [`TryReserveError`] if the allocation fails or capacity overflows.
     pub fn try_reserve(&mut self, additional: Size) -> Result<(), TryReserveError> {
-        // INVARIANT: reserving can not make the vector empty
-        self.as_mut_vec().try_reserve(additional.get())
+        // SAFETY: reserving can not make the vector empty
+        unsafe { self.as_mut_vec().try_reserve(additional.get()) }
     }
 
     /// Tries to reserve the minimum capacity for exactly `additional` more values
@@ -500,14 +512,16 @@ impl<T> NonEmptyVec<T> {
     ///
     /// [`try_reserve`]: Self::try_reserve
     pub fn try_reserve_exact(&mut self, additional: usize) -> Result<(), TryReserveError> {
-        // INVARIANT: reserving can not make the vector empty
-        self.as_mut_vec().try_reserve_exact(additional)
+        // SAFETY: reserving can not make the vector empty
+        unsafe { self.as_mut_vec().try_reserve_exact(additional) }
     }
 
     /// Shrinks the capacity of the vector as much as possible.
     pub fn shrink_to_fit(&mut self) {
-        // INVARIANT: shrinking can not make the vector empty
-        self.as_mut_vec().shrink_to_fit();
+        // SAFETY: shrinking can not make the vector empty
+        unsafe {
+            self.as_mut_vec().shrink_to_fit();
+        }
     }
 
     /// Shrinks the capacity of the vector to the specified amount.
@@ -516,14 +530,18 @@ impl<T> NonEmptyVec<T> {
     ///
     /// Does nothing if the current capacity is less than or equal to the given amount.
     pub fn shrink_to(&mut self, capacity: Size) {
-        // INVARIANT: shrinking can not make the vector empty
-        self.as_mut_vec().shrink_to(capacity.get());
+        // SAFETY: shrinking can not make the vector empty
+        unsafe {
+            self.as_mut_vec().shrink_to(capacity.get());
+        }
     }
 
     /// Shortens the vector, keeping the first `len` items and dropping the rest.
     pub fn truncate(&mut self, len: Size) {
-        // INVARIANT: length provided is non-zero, so truncating can not make the vector empty
-        self.as_mut_vec().truncate(len.get());
+        // SAFETY: length provided is non-zero, so truncating can not make the vector empty
+        unsafe {
+            self.as_mut_vec().truncate(len.get());
+        }
     }
 
     /// Moves all the items out of `other` into `self`, leaving `other` empty.
@@ -532,8 +550,10 @@ impl<T> NonEmptyVec<T> {
     ///
     /// Panics on capacity overflow.
     pub fn append(&mut self, other: &mut Vec<T>) {
-        // INVARIANT: appending can not make the vector empty
-        self.as_mut_vec().append(other);
+        // SAFETY: appending can not make the vector empty
+        unsafe {
+            self.as_mut_vec().append(other);
+        }
     }
 
     /// Inserts the given value at the specified index, shifting all items after it to the right.
@@ -542,8 +562,10 @@ impl<T> NonEmptyVec<T> {
     ///
     /// Panics if the index is out of bounds.
     pub fn insert(&mut self, index: usize, value: T) {
-        // INVARIANT: inserting can not make the vector empty
-        self.as_mut_vec().insert(index, value);
+        // SAFETY: inserting can not make the vector empty
+        unsafe {
+            self.as_mut_vec().insert(index, value);
+        }
     }
 
     /// Checks whether the vector is almost empty, meaning it only contains one value.
@@ -569,8 +591,8 @@ impl<T> NonEmptyVec<T> {
     /// or [`None`] if the vector would become empty.
     pub fn pop(&mut self) -> Option<T> {
         self.next_non_empty()
-            // INVARIANT: popping only if the vector would remain non-empty
-            .then(|| self.as_mut_vec().pop())
+            // SAFETY: popping only if the vector would remain non-empty
+            .then(|| unsafe { self.as_mut_vec().pop() })
             .flatten()
     }
 
@@ -578,8 +600,8 @@ impl<T> NonEmptyVec<T> {
     /// or [`None`] if [`false`] is returned or if the vector would become empty.
     pub fn pop_if<P: FnOnce(&mut T) -> bool>(&mut self, predicate: P) -> Option<T> {
         self.next_non_empty()
-            // INVARIANT: popping only if the vector would remain non-empty
-            .then(|| self.as_mut_vec().pop_if(predicate))
+            // SAFETY: popping only if the vector would remain non-empty
+            .then(|| unsafe { self.as_mut_vec().pop_if(predicate) })
             .flatten()
     }
 
@@ -589,8 +611,8 @@ impl<T> NonEmptyVec<T> {
     /// Returns [`None`] if the vector would become empty.
     pub fn remove(&mut self, index: usize) -> Option<T> {
         self.next_non_empty()
-            // INVARIANT: removing only if the vector would remain non-empty
-            .then(|| self.as_mut_vec().remove(index))
+            // SAFETY: removing only if the vector would remain non-empty
+            .then(|| unsafe { self.as_mut_vec().remove(index) })
     }
 
     /// Removes and returns the item at the given index within the vector,
@@ -599,20 +621,20 @@ impl<T> NonEmptyVec<T> {
     /// Returns [`None`] if the vector would become empty.
     pub fn swap_remove(&mut self, index: usize) -> Option<T> {
         self.next_non_empty()
-            // INVARIANT: swap-removing only if the vector would remain non-empty
-            .then(|| self.as_mut_vec().swap_remove(index))
+            // SAFETY: swap-removing only if the vector would remain non-empty
+            .then(|| unsafe { self.as_mut_vec().swap_remove(index) })
     }
 
     /// Splits the vector into two at the given non-zero index.
     ///
-    /// The index has to be non-zero to guarantee the vector would remain non-empty
+    /// The index has to be non-zero to guarantee the vector would remain non-empty.
     ///
     /// # Panics
     ///
     /// Panics if the provided index is out of bounds.
     pub fn split_off(&mut self, at: Size) -> Vec<T> {
-        // INVARIANT: splitting at non-zero index can not make the vector empty
-        self.as_mut_vec().split_off(at.get())
+        // SAFETY: splitting at non-zero index can not make the vector empty
+        unsafe { self.as_mut_vec().split_off(at.get()) }
     }
 
     /// Resizes the vector in-place so that its length is equal to `new`.
@@ -624,8 +646,10 @@ impl<T> NonEmptyVec<T> {
     ///
     /// [`len`]: Self::len
     pub fn resize_with<F: FnMut() -> T>(&mut self, new: Size, function: F) {
-        // INVARIANT: resizing to non-zero length can not make the vector empty
-        self.as_mut_vec().resize_with(new.get(), function);
+        // SAFETY: resizing to non-zero length can not make the vector empty
+        unsafe {
+            self.as_mut_vec().resize_with(new.get(), function);
+        }
     }
 
     /// Consumes and leaks the vector, returning the mutable slice of its contents.
@@ -653,8 +677,8 @@ impl<T> NonEmptyVec<T> {
     ///
     /// [`capacity`]: Self::capacity
     pub unsafe fn set_len(&mut self, new: Size) {
-        // INVARIANT: setting non-zero length guarantees the vector is non-empty
-        // SAFETY: the caller must uphold all invariants of the `set_len` method
+        // SAFETY: setting non-zero length guarantees the vector is non-empty
+        // moreover, the caller must uphold all safety requirements of this method
         unsafe { self.as_mut_vec().set_len(new.get()) }
     }
 
@@ -664,8 +688,8 @@ impl<T> NonEmptyVec<T> {
     ///
     /// [`set_len`]: Self::set_len
     pub fn spare_capacity_mut(&mut self) -> &mut MaybeUninitSlice<T> {
-        // INVARIANT: returning spare capacity can not make the vector empty
-        self.as_mut_vec().spare_capacity_mut()
+        // SAFETY: returning spare capacity can not make the vector empty
+        unsafe { self.as_mut_vec().spare_capacity_mut() }
     }
 
     /// Splits the vector into the non-empty initialized part and the spare capacity part.
@@ -681,8 +705,8 @@ impl<T> NonEmptyVec<T> {
 
         let capacity = self.capacity().get();
 
-        // INVARIANT: nothing here changes the length of the vector
-        let ptr = self.as_mut_vec().as_mut_ptr();
+        // SAFETY: nothing here changes the length of the vector, therefore it remains non-empty
+        let ptr = unsafe { self.as_mut_vec().as_mut_ptr() };
 
         // SAFETY: possibly there are uninitialized items past `len`, but the pointer is immediately
         // cast from `T` to `MaybeUninit<T>`, so this is safe
@@ -718,8 +742,10 @@ impl<T> NonEmptyVec<T> {
     where
         T: PartialEq,
     {
-        // INVARIANT: deduping can not make the vector empty
-        self.as_mut_vec().dedup();
+        // SAFETY: deduping can not make the vector empty
+        unsafe {
+            self.as_mut_vec().dedup();
+        }
     }
 
     /// Removes consecutive duplicated items in the vector, as determined by the supplied function.
@@ -731,8 +757,10 @@ impl<T> NonEmptyVec<T> {
     ///
     /// If the vector is sorted, this will remove all duplicates.
     pub fn dedup_by<F: FnMut(&mut T, &mut T) -> bool>(&mut self, function: F) {
-        // INVARIANT: deduping can not make the vector empty
-        self.as_mut_vec().dedup_by(function);
+        // SAFETY: deduping can not make the vector empty
+        unsafe {
+            self.as_mut_vec().dedup_by(function);
+        }
     }
 
     /// Removes consecutive duplicated items in the vector, as determined by the keys returned
@@ -740,8 +768,10 @@ impl<T> NonEmptyVec<T> {
     ///
     /// If the vector is sorted, this will remove all duplicates.
     pub fn dedup_by_key<F: FnMut(&mut T) -> K, K: PartialEq>(&mut self, function: F) {
-        // INVARIANT: deduping can not make the vector empty
-        self.as_mut_vec().dedup_by_key(function);
+        // SAFETY: deduping can not make the vector empty
+        unsafe {
+            self.as_mut_vec().dedup_by_key(function);
+        }
     }
 }
 
@@ -755,8 +785,10 @@ impl<T: Clone> NonEmptyVec<T> {
     ///
     /// [`len`]: Self::len
     pub fn resize(&mut self, new: Size, value: T) {
-        // INVARIANT: resizing to non-zero length can not make the vector empty
-        self.as_mut_vec().resize(new.get(), value);
+        // SAFETY: resizing to non-zero length can not make the vector empty
+        unsafe {
+            self.as_mut_vec().resize(new.get(), value);
+        }
     }
 
     /// Extends the vector by cloning all items from the provided value that can be
@@ -764,8 +796,10 @@ impl<T: Clone> NonEmptyVec<T> {
     ///
     /// The `slice` provided is traversed in-order.
     pub fn extend_from<S: AsRef<[T]>>(&mut self, slice: S) {
-        // INVARIANT: extending can not make the vector empty
-        self.as_mut_vec().extend_from_slice(slice.as_ref());
+        // SAFETY: extending can not make the vector empty
+        unsafe {
+            self.as_mut_vec().extend_from_slice(slice.as_ref());
+        }
     }
 
     /// Given the range within the vector, clones the items in that range
@@ -775,8 +809,10 @@ impl<T: Clone> NonEmptyVec<T> {
     ///
     /// Panics if the range is out of bounds.
     pub fn extend_from_within<R: RangeBounds<usize>>(&mut self, range: R) {
-        // INVARIANT: extending can not make the vector empty
-        self.as_mut_vec().extend_from_within(range);
+        // SAFETY: extending can not make the vector empty
+        unsafe {
+            self.as_mut_vec().extend_from_within(range);
+        }
     }
 }
 
@@ -883,15 +919,19 @@ impl<'a, T> IntoIterator for &'a mut NonEmptyVec<T> {
 
 impl<T> Extend<T> for NonEmptyVec<T> {
     fn extend<I: IntoIterator<Item = T>>(&mut self, iterable: I) {
-        // INVARIANT: extending can not make the vector empty
-        self.as_mut_vec().extend(iterable);
+        // SAFETY: extending can not make the vector empty
+        unsafe {
+            self.as_mut_vec().extend(iterable);
+        }
     }
 }
 
 impl<'a, T: Copy + 'a> Extend<&'a T> for NonEmptyVec<T> {
     fn extend<I: IntoIterator<Item = &'a T>>(&mut self, iterable: I) {
-        // INVARIANT: extending can not make the vector empty
-        self.as_mut_vec().extend(iterable);
+        // SAFETY: extending can not make the vector empty
+        unsafe {
+            self.as_mut_vec().extend(iterable);
+        }
     }
 }
 
