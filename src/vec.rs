@@ -357,6 +357,7 @@ impl<T> NonEmptyVec<T> {
         #[cfg(feature = "unsafe-assert")]
         self.assert_non_empty();
 
+        // SAFETY: the caller must ensure that the returned vector remains non-empty
         unsafe { self.as_mut_vec_no_assert() }
     }
 
