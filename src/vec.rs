@@ -303,7 +303,7 @@ impl<T> NonEmptyVec<T> {
         &self.inner
     }
 
-    const fn as_mut_vec_no_assert(&mut self) -> &mut Vec<T> {
+    const unsafe fn as_mut_vec_no_assert(&mut self) -> &mut Vec<T> {
         &mut self.inner
     }
 
@@ -357,7 +357,7 @@ impl<T> NonEmptyVec<T> {
         #[cfg(feature = "unsafe-assert")]
         self.assert_non_empty();
 
-        self.as_mut_vec_no_assert()
+        unsafe { self.as_mut_vec_no_assert() }
     }
 
     /// Returns the contained [`Vec<T>`].
