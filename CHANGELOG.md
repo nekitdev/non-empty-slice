@@ -2,6 +2,12 @@
 
 <!-- changelogging: start -->
 
+## [0.4.1](https://github.com/nekitdev/non-empty-slice/tree/v0.4.1) (2025-10-05)
+
+### Features
+
+- Added unsafe `as_mut_vec` method to `NonEmptyVec<T>`.
+
 ## [0.4.0](https://github.com/nekitdev/non-empty-slice/tree/v0.4.0) (2025-10-04)
 
 ### Changes
