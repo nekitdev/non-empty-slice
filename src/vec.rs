@@ -108,7 +108,7 @@ impl<T: Clone> ToOwned for NonEmptySlice<T> {
     type Owned = NonEmptyVec<T>;
 
     fn to_owned(&self) -> Self::Owned {
-        Self::Owned::from_non_empty_slice(self)
+        self.to_non_empty_vec()
     }
 }
 
