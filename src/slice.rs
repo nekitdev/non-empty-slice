@@ -984,6 +984,7 @@ impl NonEmptyBytes {
 
     /// Returns non-empty iterators that produce escaped version of the slice,
     /// treating it as ASCII string.
+    #[must_use]
     pub const fn escape_ascii(&self) -> EscapeAscii<'_> {
         EscapeAscii::new(self)
     }

@@ -436,6 +436,7 @@ pub struct EscapeAscii<'a> {
 
 impl<'a> EscapeAscii<'a> {
     /// Constructs [`Self`].
+    #[must_use]
     pub const fn new(bytes: &'a NonEmptyBytes) -> Self {
         Self { bytes }
     }
