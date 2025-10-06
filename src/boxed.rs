@@ -36,11 +36,11 @@ pub type NonEmptyMaybeUninitBoxedSlice<T> = NonEmptyBoxedSlice<MaybeUninit<T>>;
 pub type NonEmptyBoxedBytes = NonEmptyBoxedSlice<u8>;
 
 /// The error message used when the boxed slice is empty.
-pub const EMPTY_BOXED: &str = "the boxed slice is empty";
+pub const EMPTY_BOXED_SLICE: &str = "the boxed slice is empty";
 
 /// Similar to [`EmptyVec<T>`], but contains the empty boxed slice provided.
 #[derive(Error)]
-#[error("{EMPTY_BOXED}")]
+#[error("{EMPTY_BOXED_SLICE}")]
 #[cfg_attr(
     feature = "diagnostics",
     derive(miette::Diagnostic),
