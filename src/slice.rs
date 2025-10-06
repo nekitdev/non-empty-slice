@@ -13,7 +13,7 @@ use non_zero_size::Size;
 use thiserror::Error;
 
 use crate::iter::{
-    ChunkBy, ChunkByMut, Chunks, ChunksExact, ChunksExactMut, ChunksMut, NonEmptyIter,
+    ChunkBy, ChunkByMut, Chunks, ChunksExact, ChunksExactMut, ChunksMut, EscapeAscii, NonEmptyIter,
     NonEmptyIterMut, RChunks, RChunksExact, RChunksExactMut, RChunksMut, Windows,
 };
 
@@ -980,6 +980,12 @@ impl NonEmptyBytes {
     #[must_use]
     pub const fn trim_ascii(&self) -> &Bytes {
         self.as_slice().trim_ascii()
+    }
+
+    /// Returns non-empty iterators that produce escaped version of the slice,
+    /// treating it as ASCII string.
+    pub const fn escape_ascii(&self) -> EscapeAscii<'_> {
+        EscapeAscii::new(self)
     }
 }
 

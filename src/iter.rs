@@ -15,7 +15,7 @@ use non_zero_size::Size;
 
 use non_empty_iter::{NonEmptyAdapter, NonEmptyIterator};
 
-use crate::slice::NonEmptySlice;
+use crate::slice::{NonEmptyBytes, NonEmptySlice};
 
 /// Represents non-empty by-value iterators.
 #[cfg(any(feature = "std", feature = "alloc"))]
@@ -423,3 +423,32 @@ impl<'a, T, P: FnMut(&T, &T) -> bool> IntoIterator for ChunkByMut<'a, T, P> {
 }
 
 unsafe impl<T, P: FnMut(&T, &T) -> bool> NonEmptyIterator for ChunkByMut<'_, T, P> {}
+
+/// Represents non-empty iterators that produce escaped versions of provided slices,
+/// treating them as ASCII strings.
+///
+/// This `struct` is created by the [`escape_ascii`] method on [`NonEmptyBytes`].
+///
+/// [`escape_ascii`]: NonEmptyBytes::escape_ascii
+pub struct EscapeAscii<'a> {
+    bytes: &'a NonEmptyBytes,
+}
+
+impl<'a> EscapeAscii<'a> {
+    /// Constructs [`Self`].
+    pub const fn new(bytes: &'a NonEmptyBytes) -> Self {
+        Self { bytes }
+    }
+}
+
+impl<'a> IntoIterator for EscapeAscii<'a> {
+    type Item = u8;
+
+    type IntoIter = slice::EscapeAscii<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.bytes.as_slice().escape_ascii()
+    }
+}
+
+unsafe impl NonEmptyIterator for EscapeAscii<'_> {}
