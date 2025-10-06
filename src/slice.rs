@@ -43,24 +43,6 @@ pub struct NonEmptySlice<T> {
 /// Represents non-empty slices of possibly uninitialized values, [`NonEmptySlice<MaybeUninit<T>>`].
 pub type NonEmptyMaybeUninitSlice<T> = NonEmptySlice<MaybeUninit<T>>;
 
-#[cfg(any(feature = "std", feature = "alloc"))]
-mod owned {
-    use crate::vec::NonEmptyVec;
-
-    #[cfg(all(not(feature = "std"), feature = "alloc"))]
-    use alloc::borrow::ToOwned;
-
-    use super::NonEmptySlice;
-
-    impl<T: Clone> ToOwned for NonEmptySlice<T> {
-        type Owned = NonEmptyVec<T>;
-
-        fn to_owned(&self) -> Self::Owned {
-            Self::Owned::from_non_empty_slice(self)
-        }
-    }
-}
-
 impl<'a, T> TryFrom<&'a [T]> for &'a NonEmptySlice<T> {
     type Error = EmptySlice;
 

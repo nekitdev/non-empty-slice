@@ -8,6 +8,7 @@ use std::{collections::TryReserveError, vec::IntoIter};
 
 #[cfg(all(not(feature = "std"), feature = "alloc"))]
 use alloc::{
+    borrow::ToOwned,
     collections::TryReserveError,
     vec::{IntoIter, Vec},
 };
@@ -102,6 +103,14 @@ impl<T: Clone> Clone for NonEmptyVec<T> {
 
 /// Represents non-empty byte vectors, [`NonEmptyVec<u8>`].
 pub type NonEmptyByteVec = NonEmptyVec<u8>;
+
+impl<T: Clone> ToOwned for NonEmptySlice<T> {
+    type Owned = NonEmptyVec<T>;
+
+    fn to_owned(&self) -> Self::Owned {
+        Self::Owned::from_non_empty_slice(self)
+    }
+}
 
 impl<T> Borrow<NonEmptySlice<T>> for NonEmptyVec<T> {
     fn borrow(&self) -> &NonEmptySlice<T> {
