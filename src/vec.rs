@@ -400,6 +400,20 @@ impl<T: Clone> NonEmptyVec<T> {
     }
 }
 
+impl<T: Copy> NonEmptySlice<T> {
+    /// Creates [`NonEmptyVec<T>`] by repeating this non-empty slice certain number of times.
+    ///
+    /// # Panics
+    ///
+    /// Panics on capacity overflow.
+    pub fn repeat(&self, count: Size) -> NonEmptyVec<T> {
+        let repeated = self.as_slice().repeat(count.get());
+
+        // SAFETY: repeating non-empty slice non-zero number of times yields non-empty vector
+        unsafe { NonEmptyVec::new_unchecked(repeated) }
+    }
+}
+
 impl<T: Clone> NonEmptySlice<T> {
     /// Constructs [`Vec<T>`] from the slice via cloning.
     pub fn to_vec(&self) -> Vec<T> {
