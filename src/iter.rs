@@ -7,6 +7,7 @@ use std::vec::IntoIter;
 use alloc::vec::IntoIter;
 
 use core::{
+    fmt,
     iter::Map,
     slice::{self, Iter, IterMut},
 };
@@ -45,6 +46,7 @@ pub type NonEmptyMutSliceFn<'a, T> = fn(&'a mut [T]) -> &'a mut NonEmptySlice<T>
 /// This `struct` is created by the [`chunks`] method on [`NonEmptySlice<T>`].
 ///
 /// [`chunks`]: NonEmptySlice::chunks
+#[derive(Debug)]
 pub struct Chunks<'a, T> {
     slice: &'a NonEmptySlice<T>,
     size: Size,
@@ -79,6 +81,7 @@ unsafe impl<T> NonEmptyIterator for Chunks<'_, T> {}
 /// This `struct` is created by the [`chunks_mut`] method on [`NonEmptySlice<T>`].
 ///
 /// [`chunks_mut`]: NonEmptySlice::chunks_mut
+#[derive(Debug)]
 pub struct ChunksMut<'a, T> {
     slice: &'a mut NonEmptySlice<T>,
     size: Size,
@@ -113,6 +116,7 @@ unsafe impl<T> NonEmptyIterator for ChunksMut<'_, T> {}
 /// This `struct` is created by the [`rchunks`] method on [`NonEmptySlice<T>`].
 ///
 /// [`rchunks`]: NonEmptySlice::rchunks
+#[derive(Debug)]
 pub struct RChunks<'a, T> {
     slice: &'a NonEmptySlice<T>,
     size: Size,
@@ -147,6 +151,7 @@ impl<'a, T> IntoIterator for RChunks<'a, T> {
 /// This `struct` is created by the [`rchunks_mut`] method on [`NonEmptySlice<T>`].
 ///
 /// [`rchunks_mut`]: NonEmptySlice::rchunks_mut
+#[derive(Debug)]
 pub struct RChunksMut<'a, T> {
     slice: &'a mut NonEmptySlice<T>,
     size: Size,
@@ -184,6 +189,7 @@ unsafe impl<T> NonEmptyIterator for RChunksMut<'_, T> {}
 /// This `struct` is created by the [`chunks_exact`] method on [`NonEmptySlice<T>`].
 ///
 /// [`chunks_exact`]: NonEmptySlice::chunks_exact
+#[derive(Debug)]
 pub struct ChunksExact<'a, T> {
     slice: &'a NonEmptySlice<T>,
     size: Size,
@@ -221,6 +227,7 @@ unsafe impl<T> NonEmptyIterator for ChunksExact<'_, T> {}
 /// This `struct` is created by the [`chunks_exact_mut`] method on [`NonEmptySlice<T>`].
 ///
 /// [`chunks_exact_mut`]: NonEmptySlice::chunks_exact_mut
+#[derive(Debug)]
 pub struct ChunksExactMut<'a, T> {
     slice: &'a mut NonEmptySlice<T>,
     size: Size,
@@ -258,6 +265,7 @@ unsafe impl<T> NonEmptyIterator for ChunksExactMut<'_, T> {}
 /// This `struct` is created by the [`rchunks_exact`] method on [`NonEmptySlice<T>`].
 ///
 /// [`rchunks_exact`]: NonEmptySlice::rchunks_exact
+#[derive(Debug)]
 pub struct RChunksExact<'a, T> {
     slice: &'a NonEmptySlice<T>,
     size: Size,
@@ -295,6 +303,7 @@ unsafe impl<T> NonEmptyIterator for RChunksExact<'_, T> {}
 /// This `struct` is created by the [`rchunks_exact_mut`] method on [`NonEmptySlice<T>`].
 ///
 /// [`rchunks_exact_mut`]: NonEmptySlice::rchunks_exact_mut
+#[derive(Debug)]
 pub struct RChunksExactMut<'a, T> {
     slice: &'a mut NonEmptySlice<T>,
     size: Size,
@@ -328,6 +337,7 @@ unsafe impl<T> NonEmptyIterator for RChunksExactMut<'_, T> {}
 /// This `struct` is created by the [`windows`] method on [`NonEmptySlice<T>`].
 ///
 /// [`windows`]: NonEmptySlice::windows
+#[derive(Debug)]
 pub struct Windows<'a, T> {
     slice: &'a NonEmptySlice<T>,
     size: Size,
@@ -367,6 +377,15 @@ pub struct ChunkBy<'a, T, P: FnMut(&T, &T) -> bool> {
     predicate: P,
 }
 
+impl<T: fmt::Debug, P: FnMut(&T, &T) -> bool> fmt::Debug for ChunkBy<'_, T, P> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct(stringify!(ChunkBy))
+            .field(stringify!(slice), &self.slice)
+            .finish()
+    }
+}
+
 impl<'a, T, P: FnMut(&T, &T) -> bool> ChunkBy<'a, T, P> {
     /// Constructs [`Self`].
     pub const fn new(slice: &'a NonEmptySlice<T>, predicate: P) -> Self {
@@ -401,6 +420,15 @@ pub struct ChunkByMut<'a, T, P: FnMut(&T, &T) -> bool> {
     predicate: P,
 }
 
+impl<T: fmt::Debug, P: FnMut(&T, &T) -> bool> fmt::Debug for ChunkByMut<'_, T, P> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct(stringify!(ChunkByMut))
+            .field(stringify!(slice), &self.slice)
+            .finish()
+    }
+}
+
 impl<'a, T, P: FnMut(&T, &T) -> bool> ChunkByMut<'a, T, P> {
     /// Constructs [`Self`].
     pub const fn new(slice: &'a mut NonEmptySlice<T>, predicate: P) -> Self {
@@ -430,6 +458,7 @@ unsafe impl<T, P: FnMut(&T, &T) -> bool> NonEmptyIterator for ChunkByMut<'_, T, 
 /// This `struct` is created by the [`escape_ascii`] method on [`NonEmptyBytes`].
 ///
 /// [`escape_ascii`]: NonEmptyBytes::escape_ascii
+#[derive(Debug)]
 pub struct EscapeAscii<'a> {
     bytes: &'a NonEmptyBytes,
 }
