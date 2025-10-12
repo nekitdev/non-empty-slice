@@ -23,7 +23,7 @@ pub mod boxed;
 
 #[doc(inline)]
 #[cfg(any(feature = "std", feature = "alloc"))]
-pub use boxed::{EmptyBoxedBytes, EmptyBoxedSlice};
+pub use boxed::{EmptyBoxedBytes, EmptyBoxedSlice, NonEmptyBoxedBytes, NonEmptyBoxedSlice};
 
 #[cfg(any(feature = "std", feature = "alloc"))]
 pub mod vec;
