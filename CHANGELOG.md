@@ -2,6 +2,16 @@
 
 <!-- changelogging: start -->
 
+## [0.5.0](https://github.com/nekitdev/non-empty-slice/tree/v0.5.0) (2025-10-12)
+
+### Features
+
+- Added `escape_ascii` to `NonEmptyBytes`.
+
+- Exported `NonEmptyBoxedBytes` and `NonEmptyBoxedSlice<T>` from `boxed` module.
+
+- Added `repeat` method to `NonEmptySlice<T>` provided `T: Clone`.
+
 ## [0.4.1](https://github.com/nekitdev/non-empty-slice/tree/v0.4.1) (2025-10-05)
 
 ### Features
