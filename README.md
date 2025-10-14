@@ -3,6 +3,7 @@
 [![License][License Badge]][License]
 [![Version][Version Badge]][Crate]
 [![Downloads][Downloads Badge]][Crate]
+[![Documentation][Documentation Badge]][Documentation]
 [![Test][Test Badge]][Actions]
 
 > *Non-empty slices.*
@@ -75,4 +76,5 @@ If you are interested in contributing to `non-empty-slice`, make sure to take a 
 [License Badge]: https://img.shields.io/crates/l/non-empty-slice
 [Version Badge]: https://img.shields.io/crates/v/non-empty-slice
 [Downloads Badge]: https://img.shields.io/crates/dr/non-empty-slice
+[Documentation Badge]: https://img.shields.io/docsrs/non-empty-slice
 [Test Badge]: https://github.com/nekitdev/non-empty-slice/workflows/test/badge.svg
