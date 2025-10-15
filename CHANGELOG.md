@@ -2,6 +2,10 @@
 
 <!-- changelogging: start -->
 
+## [0.5.1](https://github.com/nekitdev/non-empty-slice/tree/v0.5.1) (2025-10-15)
+
+No significant changes.
+
 ## [0.5.0](https://github.com/nekitdev/non-empty-slice/tree/v0.5.0) (2025-10-12)
 
 ### Features
