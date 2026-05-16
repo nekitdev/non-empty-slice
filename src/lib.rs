@@ -21,17 +21,17 @@ pub use slice::{EmptySlice, NonEmptyBytes, NonEmptySlice};
 cfg_select! {
     any(feature = "std", feature = "alloc") => {
         pub mod boxed;
-        pub mod vec;
         pub mod cow;
+        pub mod vec;
 
         #[doc(inline)]
         pub use boxed::{EmptyBoxedBytes, EmptyBoxedSlice, NonEmptyBoxedBytes, NonEmptyBoxedSlice};
 
         #[doc(inline)]
-        pub use vec::{EmptyByteVec, EmptyVec, NonEmptyByteVec, NonEmptyVec};
+        pub use cow::NonEmptyCowSlice;
 
         #[doc(inline)]
-        pub use cow::NonEmptyCowSlice;
+        pub use vec::{EmptyByteVec, EmptyVec, NonEmptyByteVec, NonEmptyVec};
 
         pub(crate) mod internals;
     }
