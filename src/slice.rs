@@ -2,6 +2,7 @@
 
 use core::{
     array::TryFromSliceError,
+    hash::{Hash, Hasher},
     mem::MaybeUninit,
     ops::{Deref, DerefMut, Index, IndexMut, Range},
     ptr,
@@ -29,10 +30,16 @@ pub struct EmptySlice;
 pub type NonEmptyBytes = NonEmptySlice<u8>;
 
 /// Represents non-empty slices.
-#[derive(Debug, Hash)]
+#[derive(Debug)]
 #[repr(transparent)]
 pub struct NonEmptySlice<T> {
     inner: [T],
+}
+
+impl<T: Hash> Hash for NonEmptySlice<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.as_slice().hash(state);
+    }
 }
 
 /// Represents non-empty slices of possibly uninitialized values, [`NonEmptySlice<MaybeUninit<T>>`].

@@ -6,7 +6,7 @@ use crate::slice::NonEmptySlice;
 
 impl<T: PartialEq<U>, U> PartialEq<NonEmptySlice<U>> for NonEmptySlice<T> {
     fn eq(&self, other: &NonEmptySlice<U>) -> bool {
-        self.as_slice() == other.as_slice()
+        self == other.as_slice()
     }
 }
 
@@ -14,7 +14,7 @@ impl<T: Eq> Eq for NonEmptySlice<T> {}
 
 impl<T: PartialOrd> PartialOrd for NonEmptySlice<T> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.as_slice().partial_cmp(other.as_slice())
+        self.partial_cmp(other.as_slice())
     }
 }
 

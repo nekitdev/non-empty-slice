@@ -15,6 +15,7 @@ use alloc::{
 
 use core::{
     borrow::{Borrow, BorrowMut},
+    hash::{Hash, Hasher},
     mem::MaybeUninit,
     ops::{Deref, DerefMut, Index, IndexMut, RangeBounds},
     slice::{Iter, IterMut, SliceIndex, from_raw_parts_mut},
@@ -76,10 +77,16 @@ impl<T> EmptyVec<T> {
 pub type EmptyByteVec = EmptyVec<u8>;
 
 /// Represents non-empty [`Vec<T>`] values.
-#[derive(Debug, Hash)]
+#[derive(Debug)]
 #[repr(transparent)]
 pub struct NonEmptyVec<T> {
     inner: Vec<T>,
+}
+
+impl<T: Hash> Hash for NonEmptyVec<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.as_vec().hash(state);
+    }
 }
 
 impl<T: Clone> Clone for NonEmptyVec<T> {
