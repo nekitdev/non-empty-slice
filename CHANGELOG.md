@@ -2,6 +2,20 @@
 
 <!-- changelogging: start -->
 
+## [0.6.0](https://github.com/nekitdev/non-empty-slice/tree/v0.6.0) (2026-05-16)
+
+### Features
+
+- `non_empty_vec![x; run n]` is now supported.
+
+### Changes
+
+- `PartialEq` and `PartialOrd` have many more implementations now.
+
+### Removals
+
+- `diagnostics` feature was removed along with `miette` dependency.
+
 ## [0.5.1](https://github.com/nekitdev/non-empty-slice/tree/v0.5.1) (2025-10-15)
 
 No significant changes.
