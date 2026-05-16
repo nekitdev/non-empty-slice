@@ -1,15 +1,21 @@
 //! Non-empty [`Cow<'_, [T]>`](Cow).
 
-#[cfg(not(any(feature = "std", feature = "alloc")))]
-compile_error!("expected either `std` or `alloc` to be enabled");
-
-#[cfg(feature = "std")]
-use std::borrow::Cow;
-
-#[cfg(all(not(feature = "std"), feature = "alloc"))]
-use alloc::borrow::Cow;
+cfg_select! {
+    feature = "std" => {
+        use std::borrow::Cow;
+    }
+    feature = "alloc" => {
+        use alloc::borrow::Cow;
+    }
+    _ => {
+        compile_error!("expected either `std` or `alloc` to be enabled");
+    }
+}
 
 use crate::{boxed::NonEmptyBoxedSlice, slice::NonEmptySlice, vec::NonEmptyVec};
+
+/// Represents clone-on-write slices, [`Cow<'a, [T]>`](Cow).
+pub type CowSlice<'a, T> = Cow<'a, [T]>;
 
 /// Represents non-empty clone-on-write slices, [`Cow<'a, NonEmptySlice<T>>`](Cow).
 pub type NonEmptyCowSlice<'a, T> = Cow<'a, NonEmptySlice<T>>;

@@ -8,14 +8,14 @@ use std::io::{IoSlice, Result, Write};
 use crate::{slice::NonEmptyBytes, vec::NonEmptyByteVec};
 
 type Bytes = [u8];
-type ByteSlices<'a> = [IoSlice<'a>];
+type IoSlices<'a> = [IoSlice<'a>];
 
 impl Write for &mut NonEmptyBytes {
     fn write(&mut self, buffer: &Bytes) -> Result<usize> {
         self.as_mut_slice().write(buffer)
     }
 
-    fn write_vectored(&mut self, buffers: &ByteSlices<'_>) -> Result<usize> {
+    fn write_vectored(&mut self, buffers: &IoSlices<'_>) -> Result<usize> {
         self.as_mut_slice().write_vectored(buffers)
     }
 
@@ -38,7 +38,7 @@ impl Write for NonEmptyByteVec {
         unsafe { self.as_mut_vec().write(buffer) }
     }
 
-    fn write_vectored(&mut self, buffers: &ByteSlices<'_>) -> Result<usize> {
+    fn write_vectored(&mut self, buffers: &IoSlices<'_>) -> Result<usize> {
         // SAFETY: writing can not make the vector empty
         unsafe { self.as_mut_vec().write_vectored(buffers) }
     }

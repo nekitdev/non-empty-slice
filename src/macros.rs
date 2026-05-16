@@ -4,13 +4,17 @@
 pub mod import {
     pub use core::compile_error;
 
-    #[cfg(feature = "std")]
-    pub use std::vec;
+    cfg_select! {
+        feature = "std" => {
+            pub use std::vec;
+        }
+        feature = "alloc" => {
+            pub use alloc::vec;
+        }
+        _ => {}
+    }
 
-    #[cfg(all(not(feature = "std"), feature = "alloc"))]
-    pub use alloc::vec;
-
-    pub use non_zero_size::const_size;
+    pub use non_zero_size::{const_size, size};
 }
 
 /// Constructs [`NonEmptyVec<T>`] containing the provided arguments.
@@ -50,6 +54,39 @@ pub mod import {
 /// let repeated = non_empty_vec![13; const 42];
 /// ```
 ///
+/// Passing zero will cause compilation to fail:
+///
+/// ```compile_fail
+/// use non_empty_slice::non_empty_vec;
+///
+/// let never = non_empty_vec![13; const 0];
+/// ```
+///
+/// Instead of something like this:
+///
+/// ```
+/// use non_empty_slice::non_empty_vec;
+/// use non_zero_size::size;
+///
+/// let repeated = non_empty_vec![13; size!(42)];
+/// ```
+///
+/// It is possible to use this instead:
+///
+/// ```
+/// use non_empty_slice::non_empty_vec;
+///
+/// let repeated = non_empty_vec![13; run 42];
+/// ```
+///
+/// Passing zero will cause panics:
+///
+/// ```should_panic
+/// use non_empty_slice::non_empty_vec;
+///
+/// let never = non_empty_vec![13; run 0];
+/// ```
+///
 /// Finally, providing multiple arguments:
 ///
 /// ```
@@ -71,6 +108,9 @@ macro_rules! non_empty_vec {
     };
     ($value: expr; const $count: expr) => {
         $crate::non_empty_vec!($value; $crate::macros::import::const_size!($count))
+    };
+    ($value: expr; run $count: expr) => {
+        $crate::non_empty_vec!($value; $crate::macros::import::size!($count))
     };
     ($value: expr; $count: expr) => {
         $crate::vec::NonEmptyVec::repeat($value, $count)

@@ -2,20 +2,20 @@ pub mod import {
     pub use core::fmt;
 }
 
-macro_rules! debug {
+macro_rules! debug_empty {
     ($name: ident, $field: ident) => {
-        impl<T> $crate::format::import::fmt::Debug for $name<T> {
+        impl<T> $crate::internals::import::fmt::Debug for $name<T> {
             fn fmt(
                 &self,
-                formatter: &mut $crate::format::import::fmt::Formatter<'_>,
-            ) -> $crate::format::import::fmt::Result {
+                formatter: &mut $crate::internals::import::fmt::Formatter<'_>,
+            ) -> $crate::internals::import::fmt::Result {
                 struct DebugEmptySlice;
 
-                impl $crate::format::import::fmt::Debug for DebugEmptySlice {
+                impl $crate::internals::import::fmt::Debug for DebugEmptySlice {
                     fn fmt(
                         &self,
-                        formatter: &mut $crate::format::import::fmt::Formatter<'_>,
-                    ) -> $crate::format::import::fmt::Result {
+                        formatter: &mut $crate::internals::import::fmt::Formatter<'_>,
+                    ) -> $crate::internals::import::fmt::Result {
                         formatter.debug_list().finish()
                     }
                 }
@@ -29,4 +29,4 @@ macro_rules! debug {
     };
 }
 
-pub(crate) use debug;
+pub(crate) use debug_empty;

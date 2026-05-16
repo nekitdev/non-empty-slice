@@ -28,7 +28,7 @@ use thiserror::Error;
 
 use crate::{
     boxed::EmptyBoxedSlice,
-    format,
+    internals::debug_empty,
     iter::{IntoNonEmptyIter, NonEmptyIter, NonEmptyIterMut},
     slice::{EmptySlice, NonEmptySlice},
 };
@@ -41,16 +41,11 @@ pub const EMPTY_VEC: &str = "the vector is empty";
 /// [`EmptySlice`]: crate::slice::EmptySlice
 #[derive(Error)]
 #[error("{EMPTY_VEC}")]
-#[cfg_attr(
-    feature = "diagnostics",
-    derive(miette::Diagnostic),
-    diagnostic(code(non_empty_slice::vec), help("make sure the vector is non-empty"))
-)]
 pub struct EmptyVec<T> {
     vec: Vec<T>,
 }
 
-format::debug!(EmptyVec, vec);
+debug_empty!(EmptyVec, vec);
 
 impl<T> EmptyVec<T> {
     // NOTE: this is private to prevent creating this error with non-empty vectors
@@ -81,7 +76,7 @@ impl<T> EmptyVec<T> {
 pub type EmptyByteVec = EmptyVec<u8>;
 
 /// Represents non-empty [`Vec<T>`] values.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Hash)]
 #[repr(transparent)]
 pub struct NonEmptyVec<T> {
     inner: Vec<T>,

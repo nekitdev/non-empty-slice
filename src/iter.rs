@@ -1,15 +1,19 @@
 //! Various non-empty iterators over non-empty vectors and slices.
 
-#[cfg(feature = "std")]
-use std::vec::IntoIter;
-
-#[cfg(all(not(feature = "std"), feature = "alloc"))]
-use alloc::vec::IntoIter;
+cfg_select! {
+    feature = "std" => {
+        use std::vec::IntoIter;
+    }
+    feature = "alloc" => {
+        use alloc::vec::IntoIter;
+    }
+    _ => {}
+}
 
 use core::{
     fmt,
     iter::Map,
-    slice::{self, Iter, IterMut},
+    slice::{self as regular, Iter, IterMut},
 };
 
 use non_zero_size::Size;
@@ -62,7 +66,7 @@ impl<'a, T> Chunks<'a, T> {
 impl<'a, T> IntoIterator for Chunks<'a, T> {
     type Item = &'a NonEmptySlice<T>;
 
-    type IntoIter = Map<slice::Chunks<'a, T>, NonEmptySliceFn<'a, T>>;
+    type IntoIter = Map<regular::Chunks<'a, T>, NonEmptySliceFn<'a, T>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.slice
@@ -97,7 +101,7 @@ impl<'a, T> ChunksMut<'a, T> {
 impl<'a, T> IntoIterator for ChunksMut<'a, T> {
     type Item = &'a mut NonEmptySlice<T>;
 
-    type IntoIter = Map<slice::ChunksMut<'a, T>, NonEmptyMutSliceFn<'a, T>>;
+    type IntoIter = Map<regular::ChunksMut<'a, T>, NonEmptyMutSliceFn<'a, T>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.slice
@@ -134,7 +138,7 @@ unsafe impl<T> NonEmptyIterator for RChunks<'_, T> {}
 impl<'a, T> IntoIterator for RChunks<'a, T> {
     type Item = &'a NonEmptySlice<T>;
 
-    type IntoIter = Map<slice::RChunks<'a, T>, NonEmptySliceFn<'a, T>>;
+    type IntoIter = Map<regular::RChunks<'a, T>, NonEmptySliceFn<'a, T>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.slice
@@ -167,7 +171,7 @@ impl<'a, T> RChunksMut<'a, T> {
 impl<'a, T> IntoIterator for RChunksMut<'a, T> {
     type Item = &'a mut NonEmptySlice<T>;
 
-    type IntoIter = Map<slice::RChunksMut<'a, T>, NonEmptyMutSliceFn<'a, T>>;
+    type IntoIter = Map<regular::RChunksMut<'a, T>, NonEmptyMutSliceFn<'a, T>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.slice
@@ -205,7 +209,7 @@ impl<'a, T> ChunksExact<'a, T> {
 impl<'a, T> IntoIterator for ChunksExact<'a, T> {
     type Item = &'a NonEmptySlice<T>;
 
-    type IntoIter = Map<slice::ChunksExact<'a, T>, NonEmptySliceFn<'a, T>>;
+    type IntoIter = Map<regular::ChunksExact<'a, T>, NonEmptySliceFn<'a, T>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.slice
@@ -243,7 +247,7 @@ impl<'a, T> ChunksExactMut<'a, T> {
 impl<'a, T> IntoIterator for ChunksExactMut<'a, T> {
     type Item = &'a mut NonEmptySlice<T>;
 
-    type IntoIter = Map<slice::ChunksExactMut<'a, T>, NonEmptyMutSliceFn<'a, T>>;
+    type IntoIter = Map<regular::ChunksExactMut<'a, T>, NonEmptyMutSliceFn<'a, T>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.slice
@@ -281,7 +285,7 @@ impl<'a, T> RChunksExact<'a, T> {
 impl<'a, T> IntoIterator for RChunksExact<'a, T> {
     type Item = &'a NonEmptySlice<T>;
 
-    type IntoIter = Map<slice::RChunksExact<'a, T>, NonEmptySliceFn<'a, T>>;
+    type IntoIter = Map<regular::RChunksExact<'a, T>, NonEmptySliceFn<'a, T>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.slice
@@ -319,7 +323,7 @@ impl<'a, T> RChunksExactMut<'a, T> {
 impl<'a, T> IntoIterator for RChunksExactMut<'a, T> {
     type Item = &'a mut NonEmptySlice<T>;
 
-    type IntoIter = Map<slice::RChunksExactMut<'a, T>, NonEmptyMutSliceFn<'a, T>>;
+    type IntoIter = Map<regular::RChunksExactMut<'a, T>, NonEmptyMutSliceFn<'a, T>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.slice
@@ -353,7 +357,7 @@ impl<'a, T> Windows<'a, T> {
 impl<'a, T> IntoIterator for Windows<'a, T> {
     type Item = &'a NonEmptySlice<T>;
 
-    type IntoIter = Map<slice::Windows<'a, T>, NonEmptySliceFn<'a, T>>;
+    type IntoIter = Map<regular::Windows<'a, T>, NonEmptySliceFn<'a, T>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.slice
@@ -396,7 +400,7 @@ impl<'a, T, P: FnMut(&T, &T) -> bool> ChunkBy<'a, T, P> {
 impl<'a, T, P: FnMut(&T, &T) -> bool> IntoIterator for ChunkBy<'a, T, P> {
     type Item = &'a NonEmptySlice<T>;
 
-    type IntoIter = Map<slice::ChunkBy<'a, T, P>, NonEmptySliceFn<'a, T>>;
+    type IntoIter = Map<regular::ChunkBy<'a, T, P>, NonEmptySliceFn<'a, T>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.slice
@@ -439,7 +443,7 @@ impl<'a, T, P: FnMut(&T, &T) -> bool> ChunkByMut<'a, T, P> {
 impl<'a, T, P: FnMut(&T, &T) -> bool> IntoIterator for ChunkByMut<'a, T, P> {
     type Item = &'a mut NonEmptySlice<T>;
 
-    type IntoIter = Map<slice::ChunkByMut<'a, T, P>, NonEmptyMutSliceFn<'a, T>>;
+    type IntoIter = Map<regular::ChunkByMut<'a, T, P>, NonEmptyMutSliceFn<'a, T>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.slice
@@ -474,7 +478,7 @@ impl<'a> EscapeAscii<'a> {
 impl<'a> IntoIterator for EscapeAscii<'a> {
     type Item = u8;
 
-    type IntoIter = slice::EscapeAscii<'a>;
+    type IntoIter = regular::EscapeAscii<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.bytes.as_slice().escape_ascii()

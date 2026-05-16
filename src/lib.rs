@@ -18,29 +18,27 @@ pub mod iter;
 #[doc(inline)]
 pub use slice::{EmptySlice, NonEmptyBytes, NonEmptySlice};
 
-#[cfg(any(feature = "std", feature = "alloc"))]
-pub mod boxed;
+cfg_select! {
+    any(feature = "std", feature = "alloc") => {
+        pub mod boxed;
+        pub mod vec;
+        pub mod cow;
 
-#[doc(inline)]
-#[cfg(any(feature = "std", feature = "alloc"))]
-pub use boxed::{EmptyBoxedBytes, EmptyBoxedSlice, NonEmptyBoxedBytes, NonEmptyBoxedSlice};
+        #[doc(inline)]
+        pub use boxed::{EmptyBoxedBytes, EmptyBoxedSlice, NonEmptyBoxedBytes, NonEmptyBoxedSlice};
 
-#[cfg(any(feature = "std", feature = "alloc"))]
-pub mod vec;
+        #[doc(inline)]
+        pub use vec::{EmptyByteVec, EmptyVec, NonEmptyByteVec, NonEmptyVec};
 
-#[doc(inline)]
-#[cfg(any(feature = "std", feature = "alloc"))]
-pub use vec::{EmptyByteVec, EmptyVec, NonEmptyByteVec, NonEmptyVec};
+        #[doc(inline)]
+        pub use cow::NonEmptyCowSlice;
 
-#[cfg(any(feature = "std", feature = "alloc"))]
-pub mod cow;
+        pub(crate) mod internals;
+    }
+    _ => {}
+}
 
-#[doc(inline)]
-#[cfg(any(feature = "std", feature = "alloc"))]
-pub use cow::NonEmptyCowSlice;
-
-#[cfg(any(feature = "std", feature = "alloc"))]
-pub(crate) mod format;
+pub(crate) mod cmp;
 
 #[cfg(feature = "std")]
 pub(crate) mod io;

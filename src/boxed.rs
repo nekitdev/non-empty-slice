@@ -1,25 +1,28 @@
 //! Non-empty [`Box<[T]>`](Box).
 
-#[cfg(not(any(feature = "std", feature = "alloc")))]
-compile_error!("expected either `std` or `alloc` to be enabled");
-
 use core::mem::MaybeUninit;
 
-#[cfg(feature = "std")]
-use std::vec::IntoIter;
-
-#[cfg(all(not(feature = "std"), feature = "alloc"))]
-use alloc::{
-    boxed::Box,
-    vec::{IntoIter, Vec},
-};
+cfg_select! {
+    feature = "std" => {
+        use std::vec::IntoIter;
+    }
+    feature = "alloc" => {
+        use alloc::{
+            boxed::Box,
+            vec::{IntoIter, Vec},
+        };
+    }
+    _ => {
+        compile_error!("expected either `std` or `alloc` to be enabled");
+    }
+}
 
 use non_empty_iter::{FromNonEmptyIterator, IntoNonEmptyIterator};
 use non_zero_size::Size;
 use thiserror::Error;
 
 use crate::{
-    format,
+    internals::debug_empty,
     iter::IntoNonEmptyIter,
     slice::{EmptySlice, NonEmptyMaybeUninitSlice, NonEmptySlice},
     vec::{EmptyVec, NonEmptyVec},
@@ -41,19 +44,11 @@ pub const EMPTY_BOXED_SLICE: &str = "the boxed slice is empty";
 /// Similar to [`EmptyVec<T>`], but contains the empty boxed slice provided.
 #[derive(Error)]
 #[error("{EMPTY_BOXED_SLICE}")]
-#[cfg_attr(
-    feature = "diagnostics",
-    derive(miette::Diagnostic),
-    diagnostic(
-        code(non_empty_slice::boxed),
-        help("make sure the boxed slice is non-empty")
-    )
-)]
 pub struct EmptyBoxedSlice<T> {
     boxed: Box<[T]>,
 }
 
-format::debug!(EmptyBoxedSlice, boxed);
+debug_empty!(EmptyBoxedSlice, boxed);
 
 /// Represents empty boxed bytes, [`EmptyBoxedSlice<u8>`].
 pub type EmptyBoxedBytes = EmptyBoxedSlice<u8>;

@@ -23,18 +23,13 @@ pub const EMPTY_SLICE: &str = "the slice is empty";
 /// Represents errors returned when received slices are empty.
 #[derive(Debug, Error)]
 #[error("{EMPTY_SLICE}")]
-#[cfg_attr(
-    feature = "diagnostics",
-    derive(miette::Diagnostic),
-    diagnostic(code(non_empty_slice::slice), help("make sure the slice is non-empty"))
-)]
 pub struct EmptySlice;
 
 /// Represents non-empty bytes, [`NonEmptySlice<u8>`].
 pub type NonEmptyBytes = NonEmptySlice<u8>;
 
 /// Represents non-empty slices.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Hash)]
 #[repr(transparent)]
 pub struct NonEmptySlice<T> {
     inner: [T],
