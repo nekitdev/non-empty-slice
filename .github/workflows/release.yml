@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -34,7 +34,7 @@ jobs:
         run: changelogging preview > ${{ env.changelog }}
 
       - name: Upload changelog ${{ inputs.version }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: changelog
           path: ${{ env.changelog }}
@@ -61,7 +61,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup bot user
         run: |
@@ -79,7 +79,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -93,13 +93,13 @@ jobs:
 
     steps:
       - name: Download changelog
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           pattern: changelog
           merge-multiple: true
 
       - name: Publish to GitHub
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           body_path: ${{ env.changelog }}
           tag_name: v${{ inputs.version }}
