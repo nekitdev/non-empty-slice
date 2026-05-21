@@ -42,7 +42,8 @@ mod std_or_alloc {
     }
 
     // NOTE: `Serialize` is implemented for `Box<U>`, provided `U: Serialize`
-    // `NonEmptySlice<T>` is `Serialize`, therefore `NonEmptyBoxedSlice<T>` is as well
+    // if `T` is `Serialize`, NonEmptySlice<T>` is `Serialize`, therefore
+    // `NonEmptyBoxedSlice<T>` is as well
 
     impl<'de, T: Deserialize<'de>> Deserialize<'de> for NonEmptyBoxedSlice<T> {
         fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
