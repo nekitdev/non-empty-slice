@@ -328,18 +328,6 @@ mod std_or_alloc {
 
     // NonEmptyVec <-> NonEmptyBoxedSlice
 
-    impl<T: PartialEq<U>, U> PartialEq<NonEmptyVec<U>> for NonEmptyBoxedSlice<T> {
-        fn eq(&self, other: &NonEmptyVec<U>) -> bool {
-            self.as_ref() == other
-        }
-    }
-
-    impl<T: PartialOrd> PartialOrd<NonEmptyVec<T>> for NonEmptyBoxedSlice<T> {
-        fn partial_cmp(&self, other: &NonEmptyVec<T>) -> Option<Ordering> {
-            self.as_ref().partial_cmp(other)
-        }
-    }
-
     impl<T: PartialEq<U>, U> PartialEq<NonEmptyBoxedSlice<U>> for NonEmptyVec<T> {
         fn eq(&self, other: &NonEmptyBoxedSlice<U>) -> bool {
             self == other.as_ref()
@@ -349,6 +337,18 @@ mod std_or_alloc {
     impl<T: PartialOrd> PartialOrd<NonEmptyBoxedSlice<T>> for NonEmptyVec<T> {
         fn partial_cmp(&self, other: &NonEmptyBoxedSlice<T>) -> Option<Ordering> {
             self.partial_cmp(other.as_ref())
+        }
+    }
+
+    impl<T: PartialEq<U>, U> PartialEq<NonEmptyVec<U>> for NonEmptyBoxedSlice<T> {
+        fn eq(&self, other: &NonEmptyVec<U>) -> bool {
+            self.as_ref() == other
+        }
+    }
+
+    impl<T: PartialOrd> PartialOrd<NonEmptyVec<T>> for NonEmptyBoxedSlice<T> {
+        fn partial_cmp(&self, other: &NonEmptyVec<T>) -> Option<Ordering> {
+            self.as_ref().partial_cmp(other)
         }
     }
 
@@ -434,25 +434,25 @@ mod std_or_alloc {
 
     impl<T: PartialEq<U>, U> PartialEq<Box<[U]>> for NonEmptyBoxedSlice<T> {
         fn eq(&self, other: &Box<[U]>) -> bool {
-            self.as_ref() == other.as_ref()
+            self.as_ref() == other
         }
     }
 
     impl<T: PartialOrd> PartialOrd<Box<[T]>> for NonEmptyBoxedSlice<T> {
         fn partial_cmp(&self, other: &Box<[T]>) -> Option<Ordering> {
-            self.as_ref().partial_cmp(other.as_ref())
+            self.as_ref().partial_cmp(other)
         }
     }
 
     impl<T: PartialEq<U>, U> PartialEq<NonEmptyBoxedSlice<U>> for Box<[T]> {
         fn eq(&self, other: &NonEmptyBoxedSlice<U>) -> bool {
-            self.as_ref() == other.as_ref()
+            self == other.as_ref()
         }
     }
 
     impl<T: PartialOrd> PartialOrd<NonEmptyBoxedSlice<T>> for Box<[T]> {
         fn partial_cmp(&self, other: &NonEmptyBoxedSlice<T>) -> Option<Ordering> {
-            self.as_ref().partial_cmp(other.as_ref())
+            self.partial_cmp(other.as_ref())
         }
     }
 
