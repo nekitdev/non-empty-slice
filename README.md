@@ -6,7 +6,7 @@
 [![Documentation][Documentation Badge]][Documentation]
 [![Test][Test Badge]][Actions]
 
-> *Non-empty slices.*
+> _Non-empty slices._
 
 ## Installation
 
@@ -22,7 +22,7 @@ Or by directly specifying it in the configuration like so:
 
 ```toml
 [dependencies]
-non-empty-slice = "0.6.0"
+non-empty-slice = "0.7.0"
 ```
 
 Alternatively, you can add it directly from the source:
@@ -58,21 +58,15 @@ If you are interested in contributing to `non-empty-slice`, make sure to take a 
 `non-empty-slice` is licensed under the MIT License terms. See [License][License] for details.
 
 [Email]: mailto:support@nekit.dev
-
 [Discord]: https://nekit.dev/chat
-
 [Actions]: https://github.com/nekitdev/non-empty-slice/actions
-
 [Changelog]: https://github.com/nekitdev/non-empty-slice/blob/main/CHANGELOG.md
 [Code of Conduct]: https://github.com/nekitdev/non-empty-slice/blob/main/CODE_OF_CONDUCT.md
 [Contributing Guide]: https://github.com/nekitdev/non-empty-slice/blob/main/CONTRIBUTING.md
 [Security]: https://github.com/nekitdev/non-empty-slice/blob/main/SECURITY.md
-
 [License]: https://github.com/nekitdev/non-empty-slice/blob/main/LICENSE
-
 [Crate]: https://crates.io/crates/non-empty-slice
 [Documentation]: https://docs.rs/non-empty-slice
-
 [License Badge]: https://img.shields.io/crates/l/non-empty-slice
 [Version Badge]: https://img.shields.io/crates/v/non-empty-slice
 [Downloads Badge]: https://img.shields.io/crates/dr/non-empty-slice

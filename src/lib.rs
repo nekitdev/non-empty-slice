@@ -33,7 +33,7 @@ cfg_select! {
         #[doc(inline)]
         pub use vec::{EmptyByteVec, EmptyVec, NonEmptyByteVec, NonEmptyVec};
 
-        pub(crate) mod internals;
+        pub(crate) mod debug;
     }
     _ => {}
 }

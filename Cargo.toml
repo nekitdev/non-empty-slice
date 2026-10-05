@@ -1,9 +1,9 @@
 [package]
 name = "non-empty-slice"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["nekitdev <nekit@nekit.dev>"]
 edition = "2024"
-rust-version = "1.95"
+rust-version = "1.99"
 description = "Non-empty slices."
 documentation = "https://docs.rs/non-empty-slice"
 readme = "README.md"
@@ -16,21 +16,21 @@ categories = ["no-std", "no-std::no-alloc", "rust-patterns"]
 version = "0.2.0"
 
 [dependencies.non-empty-iter]
-version = "0.3.1"
+version = "0.4.0"
 default-features = false
 
 [dependencies.ownership]
-version = "0.3.0"
+version = "0.4.0"
 default-features = false
 optional = true
 
 [dependencies.serde]
-version = "1.0.228"
+version = "1.0.229"
 default-features = false
 optional = true
 
 [dependencies.thiserror]
-version = "2.0.18"
+version = "2.0.21"
 default-features = false
 
 [features]

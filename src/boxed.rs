@@ -22,7 +22,7 @@ use non_zero_size::Size;
 use thiserror::Error;
 
 use crate::{
-    internals::debug_empty,
+    debug,
     iter::IntoNonEmptyIter,
     slice::{EmptySlice, NonEmptyMaybeUninitSlice, NonEmptySlice},
     vec::{EmptyVec, NonEmptyVec},
@@ -48,7 +48,7 @@ pub struct EmptyBoxedSlice<T> {
     boxed: Box<[T]>,
 }
 
-debug_empty!(EmptyBoxedSlice, boxed);
+debug::empty!(EmptyBoxedSlice => boxed);
 
 /// Represents empty boxed bytes, [`EmptyBoxedSlice<u8>`].
 pub type EmptyBoxedBytes = EmptyBoxedSlice<u8>;

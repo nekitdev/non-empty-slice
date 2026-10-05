@@ -29,7 +29,7 @@ use thiserror::Error;
 
 use crate::{
     boxed::EmptyBoxedSlice,
-    internals::debug_empty,
+    debug,
     iter::{IntoNonEmptyIter, NonEmptyIter, NonEmptyIterMut},
     slice::{EmptySlice, NonEmptySlice},
 };
@@ -46,7 +46,7 @@ pub struct EmptyVec<T> {
     vec: Vec<T>,
 }
 
-debug_empty!(EmptyVec, vec);
+debug::empty!(EmptyVec => vec);
 
 impl<T> EmptyVec<T> {
     // NOTE: this is private to prevent creating this error with non-empty vectors
